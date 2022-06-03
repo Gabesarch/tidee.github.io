@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
     <!-- <link rel='stylesheet' href='https://fonts.googleapis.com/css?family=Roboto'> -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="css/style.css">
     <style>
       html,body,h1,h2,h3,h4,h5,h6 {font-family: "Titillium Web", "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;}
       <!-- .cite { background:#f0f0f0; padding:10px; font-size:18px} -->
@@ -44,8 +45,9 @@
 	<!-- paper container -->	  
 	<div class="w3-display-container w3-row w3-white w3-margin-bottom">
 	  <div class="w3-center">
-	    <h1>Particle Videos Revisited: Tracking Through Occlusions Using Point Trajectories</h1>
-	    <h5><a href="https://cs.cmu.edu/~aharley/">Adam W. Harley</a> &emsp;&emsp; <a href="https://zfang399.github.io/">Zhaoyuan Fang</a> &emsp;&emsp; <a href="https://www.cs.cmu.edu/~katef/">Katerina Fragkiadaki</a></h5>
+	    <h1>TIDEE: Novel Room Reorganization using Visuo-Semantic Common Sense Priors</h1>
+	    <h5><a href="https://www.gabesarch.me">Gabriel Sarch</a> &emsp;&emsp; <a href="https://zfang399.github.io/">Zhaoyuan Fang</a> &emsp;&emsp; <a href="https://cs.cmu.edu/~aharley/">Adam Harley</a> &emsp;&emsp; <a href="https://paulschydlo.com/">Paul Schydlo</a></h5>
+        <h5><a href="https://www.cs.cmu.edu/~katef/">Michael Tarr</a> &emsp;&emsp; <a href="https://www.cs.cmu.edu/~katef/">Saurabh Gupta</a> &emsp;&emsp; <a href="https://www.cs.cmu.edu/~katef/">Katerina Fragkiadaki</a></h5>
 	    <!--<h5><em>CVPR 2021</em></h5>-->
 	  </div>
 	  <!--
@@ -105,7 +107,7 @@
               </a>
         </div>
       </div>
-      
+
 	  <hr>
 	  <div class="w3-display-container w3-row w3-white w3-margin-bottom w3-center">
 	    <img src="images/fig1.png" style="width:100%">
@@ -114,7 +116,7 @@
 	  <div class="w3-center">
 	    <h2>Abstract</h2>
 	  </div>
-	  <p>Tracking pixels in videos is typically studied as an optical flow estimation problem, where every pixel is described with a displacement vector that locates it in the next frame. Even though wider temporal context is freely available, prior efforts to take this into account have yielded only small gains over 2-frame methods. In this paper, we revisit Sand and Teller's ``particle video'' approach, and study pixel tracking as a long-range motion estimation problem, where every pixel is described with a trajectory that locates it in multiple future frames. We re-build this classic approach using components that drive the current state-of-the-art in flow and object tracking, such as dense cost maps, iterative optimization, and learned appearance updates. We train our models using long-range amodal point trajectories mined from existing optical flow datasets that we synthetically augment with occlusions. We test our approach in trajectory estimation benchmarks and in keypoint label propagation tasks, and compare favorably against state-of-the-art optical flow and feature tracking methods.</p>
+	  <p align="justify">We introduce TIDEE, an embodied agent that tides up a disordered scene based on learned commonsense object placement and room arrangement priors. TIDEE explores a home environment, detects objects that are out of their natural place, infers plausible object contexts for them, localizes such contexts in the current scene, and repositions the objects. Commonsense priors are encoded in three modules: i) visuo-semantic detectors that detect out of place objects, ii) an associative neural graph memory of objects and spatial relations that proposes plausible semantic receptacles for object repositions, and iii) a visual search network that guides the agent’s exploration for efficiently localizing the receptacle-of-interest in the current scene to reposition the object. We test TIDEE on tidying up disorganized scenes in the AI2THOR simulation environment. TIDEE carries out the task without ever having observed the same room beforehand, relying only on priors learned from a separate set of training houses. We evaluate performance by scoring the resulting room reorganizations using human evaluators. TIDEE out performs ablative versions of the model that do not use one or more of the commonsense priors. Moreover, we show TIDEE can successfully be instructed in natural language to follow specifications for object placement, without any additional training data. Last, on the related room rearrangement benchmark [3], TIDEE outperforms the state-of-the-art by a 7x performance margin.</p>
 	  <hr>
 
 	  <!--
@@ -130,113 +132,24 @@
 	  <div class="w3-center">
 	    <h2>Demo</h2>
 	  </div>
-	  <p><strong>Goal</strong>: Given a target pixel specified on the first frame, track that pixel across the whole video.</p>
-          <table style="width:100%;border:0px;border-spacing:0px;border-collapse:separate;margin-right:auto;margin-left:auto;">
-	    <tr style="padding:0px">
-	      <td style="padding-right:1%;width:32%;vertical-align:middle">
-		<div align="center">DINO</div>
-		<img style="width:100%;max-width:100%" alt="" src="images/horse_dino.gif">
-	      </td>
-	      <td style="padding-right:1%;width:32%;vertical-align:middle">
-		<div align="center">RAFT</div>
-		<img style="width:100%;max-width:100%" alt="" src="images/horse_raft.gif">
-	      </td>
-	      <td style="padding-right:1%;width:32%;vertical-align:middle">
-		<div align="center">DPV (ours)</div>
-		<img style="width:100%;max-width:100%" alt="" src="images/horse_ours.gif">
-	      </td>
-	    </tr>
-	  </table>
-          <table style="width:100%;border:0px;border-spacing:0px;border-collapse:separate;margin-right:auto;margin-left:auto;margin-top:10px;">
-	    <tr style="padding:0px">
-	      <td style="padding-right:1%;width:32%;vertical-align:middle">
-		<!-- <div align="center">DINO</div> -->
-		<img style="width:100%;max-width:100%" alt="" src="images/camel_dino.gif">
-	      </td>
-	      <td style="padding-right:1%;width:32%;vertical-align:middle">
-		<!-- <div align="center">RAFT</div> -->
-		<img style="width:100%;max-width:100%" alt="" src="images/camel_raft.gif">
-	      </td>
-	      <td style="padding-right:1%;width:32%;vertical-align:middle">
-		<!-- <div align="center">DPV (ours)</div> -->
-		<img style="width:100%;max-width:100%" alt="" src="images/camel_ours.gif">
-	      </td>
-	    </tr>
-	  </table>
 
-          <table style="width:100%;border:0px;border-spacing:0px;border-collapse:separate;margin-right:auto;margin-left:auto;margin-top:10px;">
-	    <tr style="padding:0px">
-	      <td style="padding-right:1%;width:32%;vertical-align:middle">
-		<!-- <div align="center">DINO</div> -->
-		<img style="width:100%;max-width:100%" alt="" src="images/dog_dino.gif">
-	      </td>
-	      <td style="padding-right:1%;width:32%;vertical-align:middle">
-		<!-- <div align="center">RAFT</div> -->
-		<img style="width:100%;max-width:100%" alt="" src="images/dog_raft.gif">
-	      </td>
-	      <td style="padding-right:1%;width:32%;vertical-align:middle">
-		<!-- <div align="center">DPV (ours)</div> -->
-		<img style="width:100%;max-width:100%" alt="" src="images/dog_ours.gif">
-	      </td>
-	    </tr>
-	  </table>
+      <div class="w3-center">
+	    <h2>Video</h2>
+	  </div>
 
-          <table style="width:100%;border:0px;border-spacing:0px;border-collapse:separate;margin-right:auto;margin-left:auto;margin-top:10px;">
-	    <tr style="padding:0px">
-	      <td style="padding-right:1%;width:32%;vertical-align:middle">
-		<!-- <div align="center">DINO</div> -->
-		<img style="width:100%;max-width:100%" alt="" src="images/horse2_dino.gif">
-	      </td>
-	      <td style="padding-right:1%;width:32%;vertical-align:middle">
-		<!-- <div align="center">RAFT</div> -->
-		<img style="width:100%;max-width:100%" alt="" src="images/horse2_raft.gif">
-	      </td>
-	      <td style="padding-right:1%;width:32%;vertical-align:middle">
-		<!-- <div align="center">DPV (ours)</div> -->
-		<img style="width:100%;max-width:100%" alt="" src="images/horse2_ours.gif">
-	      </td>
-	    </tr>
-	  </table>
-
-	  <!-- <p>Our model is trained once, on a large synthetic dataset.</p>n  -->
-
-	  <p>Our model can be deployed to track any number of pixels.</p>
-
-          <table style="width:100%;border:0px;border-spacing:0px;border-collapse:separate;margin-right:auto;margin-left:auto;margin-top:10px;">
-	    <tr style="padding:0px">
-	      <td style="padding-right:1%;width:32%;vertical-align:middle">
-		<!-- <div align="center">DINO</div> -->
-		<img style="width:100%;max-width:100%" alt="" src="images/camel_mask.gif">
-	      </td>
-	      <td style="padding-right:1%;width:32%;vertical-align:middle">
-		<!-- <div align="center">RAFT</div> -->
-		<img style="width:100%;max-width:100%" alt="" src="images/fish_mask.gif">
-	      </td>
-	      <td style="padding-right:1%;width:32%;vertical-align:middle">
-		<!-- <div align="center">DPV (ours)</div> -->
-		<img style="width:100%;max-width:100%" alt="" src="images/dancer_mask.gif">
-	      </td>
-	    </tr>
-	  </table>
-
-          <table style="width:100%;border:0px;border-spacing:0px;border-collapse:separate;margin-right:auto;margin-left:auto;margin-top:10px;">
-	    <tr style="padding:0px">
-	      <td style="padding-right:1%;width:32%;vertical-align:middle">
-		<!-- <div align="center">DINO</div> -->
-		<img style="width:100%;max-width:100%" alt="" src="images/horse_dense.gif">
-	      </td>
-	      <td style="padding-right:1%;width:32%;vertical-align:middle">
-		<!-- <div align="center">RAFT</div> -->
-		<img style="width:100%;max-width:100%" alt="" src="images/judo_dense.gif">
-	      </td>
-	      <td style="padding-right:1%;width:32%;vertical-align:middle">
-		<!-- <div align="center">DPV (ours)</div> -->
-		<img style="width:100%;max-width:100%" alt="" src="images/duck_dense.gif">
-	      </td>
-	    </tr>
-	  </table>
-
-
+      <section class="section" id="overflow-example">
+        <div>
+          <h2 class="title">BibTeX</h2>
+        </div>
+          <pre style="background-color:#F5F5F5;"><code style="color:black">@article{park2021nerfies,
+        author    = {Park, Keunhong and Sinha, Utkarsh and Barron, Jonathan T. and Bouaziz, Sofien and Goldman, Dan B and Seitz, Steven M. and Martin-Brualla, Ricardo},
+        title     = {Nerfies: Deformable Neural Radiance Fields},
+        journal   = {ICCV},
+        year      = {2021},
+      }</code></pre>
+      <div>
+    </div>
+      </section>
 	  
 	  <!-- <div class="w3-display-container w3-row w3-white w3-margin-bottom w3-center"> -->
 	  <!--   <iframe width="800" height="600" src="https://www.youtube.com/embed/Jg2f5fkgxZo" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe> -->
@@ -244,7 +157,7 @@
 	  <hr>
 	  
 
-	  <div class="w3-row w3-margin" style="padding-bottom:2em">
+	  <!-- <div class="w3-row w3-margin" style="padding-bottom:2em">
 	    <div class="w3-center"><h2>Paper</h2></div>
 	    <div class="w3-col s0 m1 l2" style="height:10px"></div>
 	    <div class="w3-col s6 m3 l2">
@@ -259,7 +172,7 @@
 	      <h3><a href="https://arxiv.org/pdf/2204.04153.pdf">[pdf]</a>&emsp;<a href="bib.txt">[bibtex]</a></h3>
 	    </div>
 	    <div class="w3-col s0 m1 l2" style="height:10px"></div>
-	  </div>
+	  </div> -->
 	  <hr>
 	  
 	  <!-- end paper container -->
