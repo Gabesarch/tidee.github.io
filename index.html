@@ -1082,5 +1082,488 @@
 	</div><!-- End Grid -->
       </div><!-- End Page Container -->
 
+      <script>
+        function isElementInViewport(el) {
+            let rect = el.getBoundingClientRect();
+            let w = (window.innerWidth || document.documentElement.clientWidth);
+            let h = (window.innerHeight || document.documentElement.clientHeight);
+            return rect.bottom > 0 && // rect.bottom < h &&
+                rect.right > 0 && // rect.right < w &&
+                rect.left < w && // rect.left > 0 &&
+                rect.top < h // && rect.top > 0;
+        }
+    
+    
+        function loadAndPlayVisible(t, resetTime, noplay) {
+            noplay = (noplay === true);
+            resetTime = (resetTime !== false);
+            if (t.getAttribute('data-loaded') !== "true") {
+                t.querySelectorAll('video, img').forEach(ell => {
+                    if (ell.hasAttribute('data-src')) {
+                        ell.setAttribute('playsinline', '');
+                        ell.setAttribute('muted', '');
+                        ell.setAttribute('loop', '');
+                        ell.setAttribute('autoplay', '');
+                        ell.src = ell.getAttribute('data-src');
+                        ell.removeAttribute('poster');
+                        ell.removeAttribute('height');
+                    }
+                });
+                t.setAttribute('data-loaded', 'true');
+            }
+            // if (noplay) return;
+            // }
+    
+            // if (entry.intersectionRatio > 0.5) {
+            // console.log('int in play', t, entry.intersectionRatio)
+            // setTimeout(() => {
+            let videos = [...t.querySelectorAll('video')];
+            Promise.all(videos.map(video => {
+                return new Promise(resolve => {
+                    if (video.readyState === 4) resolve(video);
+                    else video.addEventListener('canplaythrough', resolve);
+                }).then(() => {
+                    if (noplay) video.pause();
+                })
+            })).then(() => {
+                videos.forEach(v => {
+                    if (!noplay && v.offsetParent !== null) {
+                        if (resetTime) v.currentTime = 0;
+                        v.play();
+                    }
+                });
+            });
+        }
+    
+        function pause(t, resetTime) {
+            resetTime = (resetTime !== false);
+            t.querySelectorAll('video').forEach(video => {
+                video.pause();
+                if (resetTime) video.currentTime = 0;
+            });
+        }
+    
+        function registerSplide(s) {
+            let splide = s.mount(window.splide.Extensions);
+            splide.on('intersection', function (entry) {
+                let t = entry.target;
+                t.querySelectorAll('.is-visible').forEach(el => {
+                    if (entry.isIntersecting) {
+                        loadAndPlayVisible(el, true, !AUTOPLAY);
+                        // console.log('intersection', t);
+                    } else pause(el);
+                });
+            }).on('visible', function (slide) {
+                let t = slide.slide;
+                // setTimeout(() => {
+                loadAndPlayVisible(t, true, !AUTOPLAY);
+                // }, 100);
+            }).on('hidden', function (slide) {
+                let t = slide.slide;
+                pause(t);
+            });
+        }
+    
+        function carousel(id, data) {
+            let lis = "";
+            for (let d of data) {
+                lis += `<li class="splide__slide">${d}</li>`;
+            }
+            ret = `<div id="${id}" class="splide mt-3 mb-3" aria-label="BlobGAN results">
+    <div class="splide__track_and_arrows">
+      <div class="splide__arrows"><button aria-label="Previous" class="splide__arrow splide__arrow--prev">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40" width="40" height="40" focusable="false"><path d="m15.5 0.932-4.3 4.38 14.5 14.6-14.5 14.5 4.3 4.4 14.6-14.6 4.4-4.3-4.4-4.4-14.6-14.6z"></path></svg>
+          </button>
+      </div>
+    <div class="splide__track">
+    <ul class="splide__list">
+    ${lis}
+    </ul>
+    
+    </div>
+    
+         <div class="splide__arrows"> <button aria-label="Next" class="splide__arrow splide__arrow--next">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40" width="40" height="40" focusable="false"><path d="m15.5 0.932-4.3 4.38 14.5 14.6-14.5 14.5 4.3 4.4 14.6-14.6 4.4-4.3-4.4-4.4-14.6-14.6z"></path></svg>
+          </button></div></div>
+          <div class="splide__pagination"></div>
+            </div>`;
+            document.getElementById(id).outerHTML = ret;
+            // $('#' + id).replaceWith(ret);
+            return ret;
+        }
+    
+        // $(document).ready(function () {
+        document.querySelectorAll('ltx').forEach(e => {
+            let txt = e.innerHTML;
+            e.innerHTML = `<img class="ltx" src="https://math.vercel.app?inline=${txt}" alt="${txt}">`;
+        })
+        make_carousel = (id, f_str, n_files, opts, htmlstr) => {
+            let files = [];
+            let html = htmlstr || "";
+            var ctr = 0;
+            for (let i of n_files) {
+                files.push(`<div class="video-container">
+    <video style="" ${htmlstr}  ${ctr++ ? "data-" : "autoplay "}src="static/vids/${f_str}final/${i}.mp4" playsinline muted loop></video>
+    <!--<div class="video-border"></div>-->
+    </div>`)
+            }
+            carousel(id, files);
+            registerSplide(new Splide('#' + id, opts));
+        }
+    
+        /*
+                    <div class="col"><div id="movebed_carousel"></div></div>
+                <div class="col"><div id="movefan_carousel"></div></div>
+                <div class="col"><div id="movepainting_carousel"></div></div>
+                <div class="col"><div id="movewindow_carousel"></div></div>
+                <div class="col"><div id="moveall_carousel"></div></div>
+        * */
+    
+        let moves = ['beds', 'fans', 'paintings', 'windows', 'all_leftright'];
+        let movedata = [];
+        var ctr = 0;
+        for (let move of moves) {
+            movedata.push(`<div style="text-align: center;">Move ${move.replace('all_leftright', 'everything')}</div><div class="move-cont"><video playsinline muted  loop  ${ctr++ ? "data-" : "autoplay "}src="static/vids/move_${move}/final/5.mp4"></video></div>`);
+        }
+    
+        carousel('moveobj_carousel', movedata);
+        registerSplide(new Splide('#moveobj_carousel', {
+            type: 'loop', intersection: {threshold: 0, rootMargin: '-40px'},
+            perPage: 1,
+            perMove: 1,
+            pagination: true,
+            lazyLoad: 'nearby',
+            preloadPages: 0,
+        }));
+    
+    
+        moves = ['beds', 'paintings', 'windows'];
+        movedata = [];
+        var ctr = 0;
+        for (let move of moves) {
+            movedata.push(`<div style="text-align: center;">Resize ${move.replace('all_leftright', 'everything')}</div><div class="move-cont"><video   ${ctr++ ? "data-" : "autoplay "}src="static/vids/shrink_${move}/final/5.mp4" playsinline muted loop></video></div>`);
+        }
+    
+        carousel('resizeobj_carousel', movedata);
+        registerSplide(new Splide('#resizeobj_carousel', {
+            type: 'loop', intersection: {threshold: 0, rootMargin: '-40px'},
+            perPage: 1,
+            perMove: 1,
+            pagination: true,
+            lazyLoad: 'nearby',
+            preloadPages: 0,
+        }));
+    
+        moves = ['remove_screens', 'move_tables_conf', 'shrink_table_conf'];
+        titlemap = {
+            remove_screens: 'Remove TVs and screens',
+            move_tables_conf: 'Move desks and chairs',
+            shrink_table_conf: 'Shrink and enlarge furniture'
+        }
+        movedata = [];
+        var ctr = 0;
+        for (let move of moves) {
+            movedata.push(`<div style="text-align: center;">${titlemap[move]}</div><div class="move-cont">
+    <video  ${ctr++ ? "data-" : "autoplay "}src="static/vids/${move}/final/5.mp4" playsinline muted loop></video>
+    </div>`);
+        }
+    
+        carousel('editconf_carousel', movedata);
+        registerSplide(new Splide('#editconf_carousel', {
+            type: 'loop', intersection: {threshold: 0, rootMargin: '-40px'},
+            perPage: 1,
+            perMove: 1,
+            pagination: true,
+            lazyLoad: 'nearby',
+            preloadPages: 0,
+        }));
+    
+        make_carousel('cloneobj_carousel', 'clone/', [1, 3, 5], {
+            type: 'loop', intersection: {threshold: 0, rootMargin: '-40px'},
+            perPage: 3,
+            perMove: 1,
+            pagination: true,
+            lazyLoad: 'nearby',
+            preloadPages: 0,
+            showblobs: true,
+            breakpoints: {
+                991: {perPage: 2},
+                510: {
+                    perPage: 1,
+                },
+            }
+        }, '');
+        make_carousel('restyleobj_carousel', 'restyle/', [1, 5, 3, 11, 7, 9], {
+            type: 'loop', intersection: {threshold: 0, rootMargin: '-40px'},
+            perPage: 3,
+            showblobs: false,
+            perMove: 1,
+            pagination: true,
+            lazyLoad: 'nearby',
+            preloadPages: 0,
+            breakpoints: {
+                991: {perPage: 2},
+                510: {
+                    perPage: 1
+                },
+            }
+        }, '');
+    
+        make_carousel('moredata_resize_carousel', 'resizekld/', [0, 1, 2, 3, 4, 5, 6, 7], {
+            type: 'loop', intersection: {threshold: 0, rootMargin: '-40px'},
+            perPage: 6,
+            showblobs: true,
+            perMove: 1,
+            pagination: true,
+            lazyLoad: 'nearby',
+            preloadPages: 0,
+            breakpoints: {
+                991: {perPage: 4},
+                767: {
+                    perPage: 3,
+                }, 510: {
+                    perPage: 2,
+                },
+            }
+        }, '');
+    
+        make_carousel('moredata_move_carousel', 'movetablechair/', [0, 1, 2, 3, 4, 5, 6, 7], {
+            type: 'loop', intersection: {threshold: 0, rootMargin: '-40px'},
+            perPage: 6,
+            showblobs: true,
+            perMove: 1,
+            pagination: true,
+            lazyLoad: 'nearby',
+            preloadPages: 0,
+            breakpoints: {
+                991: {perPage: 4},
+                767: {
+                    perPage: 3,
+                }, 510: {
+                    perPage: 2,
+                },
+            }
+        }, '');
+    
+        let fillrooms_data = [];
+        for (let i = 0; i < 4; i++) {
+            fillrooms_data.push(`<div class="emptyrooms"><img ${i ? "data-" : "autoplay "}src="static/vids/emptyrooms/empty${i}.png" alt="Empty room"><img ${i ? "data-" : "autoplay "}src="static/vids/emptyrooms/filled${i}.png" alt="Filled rooms"></div>`);
+        }
+        carousel('fillrooms_carousel', fillrooms_data);
+        registerSplide(new Splide('#fillrooms_carousel', {
+            type: 'loop', intersection: {threshold: 0, rootMargin: '-40px'},
+            perPage: 1,
+            perMove: 1,
+            pagination: true,
+            lazyLoad: 'nearby',
+            preloadPages: 0
+        }));
+    
+    
+        let styletransfer_data = Array(2).fill().map((_, i) => '<div class="styletransfer">' + '<span>Original</span><span>Auto-restyle</span><span>Randomly restyle</span>'
+            + Array(7).fill().map((_, j) => `<img data-grid-idx="${i}" src="static/vids/styletransfer/img-${i + 1 + (j * 2)}.png">` + ((j === 0 || j === 3) ? "<span></span>" : "")).join('') + '</div>');
+        carousel('styletransfer_carousel', styletransfer_data);
+        registerSplide(new Splide('#styletransfer_carousel', {
+            type: 'loop', intersection: {threshold: 0, rootMargin: '-40px'},
+            perPage: 1,
+            perMove: 1,
+            pagination: true,
+            lazyLoad: 'nearby',
+            preloadPages: 0
+        }));
+    
+        let loccond_data = Array(2).fill().map((_, i) => '<div class="styletransfer">' + `<span>${i ? "Dresser" : "Bed"} blob</span><span>Auto-complete</span><span>Randomly complete</span>`
+            + Array(14).fill().map((_, j) => `<img data-grid-idx="${i}"  src="static/vids/layoutcond/imgs-${i * 2 + 1 + Math.floor(j / 7) + (j % 7 * 4)}.png">` + ((j % 7 === 0 || j % 7 === 3) ? "<span></span>" : "")).join('') + '</div>');
+        carousel('loccond_carousel', loccond_data);
+        registerSplide(new Splide('#loccond_carousel', {
+            type: 'loop', intersection: {threshold: 0, rootMargin: '-40px'},
+            perPage: 1,
+            perMove: 1,
+            pagination: true,
+            lazyLoad: 'nearby',
+            preloadPages: 0
+        }));
+    
+        let inversion_data = Array(11).fill().map((_, i) => `<div class="inversion">
+    <span>Real image</span><span>Reconstructed</span><span>Remove beds</span><span>Remove other</span><span>Move objects</span>
+    <div><img  ${i ? "data-" : "autoplay "}src="static/vids/inv/real${String(i).padStart(2, '0')}.png" alt="."></div><div>
+    <img  ${i ? "data-" : "autoplay "}src="static/vids/inv/inv${String(i).padStart(2, '0')}.png" alt=".">
+    </div>
+    <div class="video-container"><video   ${i ? "data-" : "autoplay "}src="static/vids/inv_rem_bed/${i}.mp4" playsinline muted loop alt="" >
+    </div>
+    <div class="video-container"><video  ${i ? "data-" : "autoplay "}src="static/vids/inv_rem_other/${i}.mp4" playsinline muted loop alt="" >
+    </div>
+    <div class="video-container"><video  ${i ? "data-" : "autoplay "}src="static/vids/inv_move/${i}.mp4" playsinline muted loop alt="" >
+    </div></div>
+    `);
+        inversion_data.splice(9, 1);
+        carousel('inversion_carousel', inversion_data);
+        registerSplide(new Splide('#inversion_carousel', {
+            type: 'loop', intersection: {threshold: 0, rootMargin: '-40px'},
+            perPage: 1,
+            perMove: 1,
+            pagination: true,
+            lazyLoad: 'nearby',
+            preloadPages: 0
+        }));
+    
+        //carousel
+        document.querySelectorAll('h3, h5').forEach(
+            e => {
+                if (e.getAttribute('data-exclude-link') === null) {
+                    let el = e;
+                    e.innerHTML = `<span style="" class="pe-1">${e.innerHTML}</span>`
+                    let link = location.href.replace(location.search, '').replace(location.hash, '') + '#' + e.id;
+                    eid = e.id
+                    e = e.firstChild
+                    e.setAttribute('data-clipboard-text', link)
+                    e.setAttribute('data-bs-toggle', 'tooltip')
+                    e.setAttribute('data-anchor', eid);
+                    e.setAttribute('data-bs-placement', "right")
+                    e.setAttribute('title', 'Copy link')
+                    // e.outerHTML = `<${e.tagName}>${e.outerHTML.replaceAll('h3', 'span')}</${e.tagName}>`
+                    let addbtn = false;
+                    let ell = el;
+                    if (!el.hasAttribute('data-not-vid'))
+                        while (el) {
+                            el = el.nextElementSibling;
+                            if (el.tagName === 'H3' || el.tagName === 'H5')
+                                break;
+                            else if (el.classList.contains('splide')) {
+                                addbtn = true;
+                                break;
+                            }
+                        }
+                    if (addbtn) {
+                        ell.innerHTML += `<div class="btn-group playpause ms-2" role="group" aria-label="Play/pause">
+      <button aria-label="Play or pause video" type="button" data-action="play" data-target-id="${el.id}" class="iconbutton btn btn-dark"><span class="material-symbols-rounded">
+    play_pause
+    </span></button>
+    <!--  <button type="button" data-action="pause" data-target-id="${el.id}" class="btn btn-dark"><i class="fa-solid fa-xs fa-pause"></i></button>-->
+    </div>`
+                    }
+                }
+            }
+        )
+    
+        function jump(h) {
+            var url = location.href;               //Save down the URL without hash.
+            location.href = "#" + h;                 //Go to the target element.
+            history.replaceState(null, null, location.href);   //Don't like hashes. Changing it back.
+        }
+    
+        let clip = new ClipboardJS('[data-clipboard-target],[data-clipboard-text]');
+        clip.on('success', function (e) {
+            if (e.trigger.parentElement.classList.contains('links')) {
+                tooltipList.get(document.getElementById('citelink')).enable();
+                tooltipList.get(document.getElementById('citelink')).show();
+                setTimeout(function () {
+                    tooltipList.get(document.getElementById('citelink')).hide();
+                    tooltipList.get(document.getElementById('citelink')).disable();
+                }, 2000);
+            } else {
+                let orig = e.trigger.getAttribute('data-bs-original-title');
+                e.trigger.setAttribute('data-bs-original-title', 'Copied!');
+                tooltipList.get(e.trigger).show();
+                e.clearSelection();
+                if (e.trigger.hasAttribute('data-clipboard-text')) {
+                    // jump(e.trigger.getAttribute('data-anchor')); // this one is good - uncomment if functionality is desired
+                    // e.trigger.scrollIntoView({behavior: 'smooth'});
+                }
+                setTimeout(function () {
+                    e.trigger.setAttribute('data-bs-original-title', orig);
+                }, 2000);
+            }
+        })
+    
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+        var tooltipList = new Map(tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return [tooltipTriggerEl, new bootstrap.Tooltip(tooltipTriggerEl)]
+        }),);
+    
+        try {
+            tooltipList.get(document.getElementById('citelink')).disable();
+        } catch (e) {
+    
+        }
+    
+        /*document.querySelectorAll('.teaser video').forEach(video => {
+            let observer = new IntersectionObserver((entries, observer) => {
+                entries.forEach(entry => {
+                    if (entry.intersectionRatio !== 1 && !video.paused) {
+                        video.pause();
+                        video.setAttribute('data-is-paused', 'true');
+                        // console.log('autopause', video)
+                    } else if (video.getAttribute('data-is-paused') === "true") {
+                        video.play();
+                        video.setAttribute('data-is-paused', 'false');
+                        // console.log('autoplay', video)
+                    }
+                });
+            }, {threshold: 0, rootMargin: '-40px'});
+            observer.observe(video);
+        });*/
+    
+        document.querySelectorAll('.playpause button').forEach(btn => {
+            btn.addEventListener("click", function (e) {
+                let t = document.getElementById(btn.getAttribute('data-target-id'));
+                // let play = btn.getAttribute('data-action') === "play";
+                if (t === null) return;
+                let play = t.querySelector('.is-visible video').paused;
+                t.querySelectorAll('.is-visible').forEach(el => {
+                    if (play) loadAndPlayVisible(el, false);
+                    else pause(el, false);
+                });
+            });
+        })
+        var AUTOPLAY = true;
+    
+        /* var AUTOPLAY = localStorage.getItem("autoplay") !== "false";
+         localStorage.setItem("autoplay", AUTOPLAY);
+         document.querySelector('.autoplaytoggle button').innerHTML = `<span class="me-1 material-symbols-rounded">
+     replay
+     </span> Turn ${AUTOPLAY ? "off" : "on"} autoplay`;
+    
+         document.querySelector('.autoplaytoggle button').addEventListener('click', function (e) {
+             this.innerHTML = `<span class="me-1 material-symbols-rounded">
+     replay
+     </span> Turn ${AUTOPLAY ? "on" : "off"} autoplay`;
+             AUTOPLAY = !AUTOPLAY;
+             if (AUTOPLAY) {
+                 document.querySelectorAll('.splide').forEach(s => {
+                     if (isElementInViewport(s))
+                         s.querySelectorAll('.is-visible').forEach(el => {
+                             if (isElementInViewport(el)) loadAndPlayVisible(el, false);
+                             else {
+                                 pause(el);
+                             }
+                         });
+                 });
+             } else {
+                 document.querySelectorAll('video').forEach(v => v.hasAttribute('data-no-pause') ? '' : v.pause());
+             }
+             localStorage.setItem("autoplay", AUTOPLAY);
+         });*/
+        /*    document.querySelectorAll('.splide').forEach(splide => {
+                let observer = new IntersectionObserver((entries, observer) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            let t = entry.target;
+                            // console.log('any int at all ', t)
+                            if (t.getAttribute('data-loaded') !== "true") {
+                                t.querySelectorAll('video, img').forEach(el => {
+                                    el.src = el.getAttribute('data-src');
+                                });
+                                t.setAttribute('data-loaded', 'true');
+                            }
+                        }
+                    });
+                }, {threshold: [0,1]});
+                observer.observe(splide);
+            });*/
+    
+    </script>
+      
   </body>
+
 </html>
